@@ -1,0 +1,46 @@
+#compdef hadoop 
+
+local start state ret=1 cmds subcmds remote_paths
+
+_remote_paths() { 
+    remote_paths=( $(hadoop fs -ls | cut -c 64-) )
+    if [[ $remote_paths != "" ]]; then
+        _values 'remote_paths' $remote_paths && ret=0
+    fi
+}
+
+_arguments -C \
+    '1: :->cmds' \
+    '2: :->subcmds' \
+    '*: :->args' && ret=0
+
+case "$state" in
+    (cmds)
+        cmds=(
+            "fs:HDFS file system"
+        )   
+        _describe -t commands 'hadoop command' cmds && ret=0
+    ;;  
+    (subcmds)
+        subcmds=(
+            "-cat:Copies source paths to stdout."
+            "-ls:Returns stat on a file or a complete list of children for a directory."
+            "-chgrp:Change group association of files."
+        )   
+        _describe -t commands 'hadoop subcommand' subcmds && ret=0
+    ;;  
+    (args)
+        case "$words[3]" in
+            -cat)
+                _remote_paths
+            ;;  
+            -chgrp)
+            ;;  
+            -ls)
+            ;;  
+        esac
+        ;;  
+esac
+
+
+return ret 
